@@ -3,13 +3,20 @@ import gql from 'graphql-tag';
 import { graphql } from 'react-apollo';
 import { Link } from 'react-router';
 import query from '../queries/fetchSongs';
+import { compose, withHandlers } from 'recompose';
 
-const Lists = ({ list }) => (
+const Lists = ({ onSongDelete, list }) => (
   <div>
     <ul className="collection">
-      {list.map((song, index) => (
-        <li key={song.id} className="collection-item">
-          {song.title}
+      {list.map(({ id, title }) => (
+        <li key={id} className="collection-item">
+          {title}
+          <i
+            className="material-icons"
+            onClick={() => onSongDelete(id)}
+          >
+            delete
+          </i>
         </li>
       ))}
     </ul>
@@ -24,10 +31,40 @@ const Lists = ({ list }) => (
 
 const Loading = () => <div>Loading...</div>;
 
-const SongList = ({ data: { loading, songs } }) => {
+const SongList = ({
+  onSongDelete,
+  data: { loading, songs }
+}) => {
   console.log('Props......', songs);
 
-  return loading ? <Loading /> : <Lists list={songs} />;
+  return loading ? (
+    <Loading />
+  ) : (
+    <Lists list={songs} onSongDelete={onSongDelete} />
+  );
 };
 
-export default graphql(query)(SongList);
+const mutation = gql`
+  mutation DeleteSong($id: ID) {
+    deleteSong(id: $id) {
+      id
+    }
+  }
+`;
+
+// export default graphql(mutation)(graphql(query)(SongList));
+export default compose(
+  graphql(query),
+  graphql(mutation),
+  withHandlers({
+    onSongDelete: ({ mutate }) => id => {
+      // console.log('onsong delete', id);
+      mutate({
+        // past variable $id to mutation DeleteSong
+        variables: {
+          id
+        }
+      });
+    }
+  })
+)(SongList);

@@ -58,6 +58,7 @@ export default compose(
     handleSubmit: ({ mutate, title }) => event => {
       event.preventDefault();
       mutate({
+        // past variable $title to mutation AddSong
         variables: {
           title
         },
