@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link, hashHistory } from 'react-router';
 import {
   compose,
   withState,
@@ -7,6 +8,7 @@ import {
 } from 'recompose';
 import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';
+import query from '../queries/fetchSongs';
 
 const mutation = gql`
   mutation AddSong($title: String) {
@@ -23,6 +25,7 @@ const SongCreate = ({
 }) => {
   return (
     <div>
+      <Link to="/">Back</Link>
       <h3>Create a New Song</h3>
       <form onSubmit={event => handleSubmit(event)}>
         <label>Song Title:</label>
@@ -56,9 +59,15 @@ export default compose(
       event.preventDefault();
       mutate({
         variables: {
-          title: title
-        }
-      });
+          title
+        },
+        // arg2 fix SongList not fetch data when navigate from songCreate
+        refetchQueries: [{ query }]
+      })
+        .then(() => hashHistory.push('/'))
+        .catch(() => {
+          console.log('Error! create fail');
+        });
     }
   })
 )(SongCreate);
