@@ -57,14 +57,16 @@ export default compose(
   graphql(query),
   graphql(mutation),
   withHandlers({
-    onSongDelete: ({ mutate }) => id => {
+    onSongDelete: ({ mutate, data }) => id => {
       // console.log('onsong delete', id);
       mutate({
         // past variable $id to mutation DeleteSong
         variables: {
           id
         }
-      });
+      })
+        // refetch own commonent
+        .then(() => data.refetch());
     }
   })
 )(SongList);

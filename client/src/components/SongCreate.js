@@ -62,7 +62,7 @@ export default compose(
         variables: {
           title
         },
-        // arg2 fix SongList not fetch data when navigate from songCreate
+        // refetch another component (SongList)
         refetchQueries: [{ query }]
       })
         .then(() => hashHistory.push('/'))
